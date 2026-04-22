@@ -1,0 +1,107 @@
+We must UPDATE the existing TimeTrack Pro project.
+Do NOT rebuild the app. Modify the current code.
+
+====================================================
+1) DARK MODE PERSISTENTE 🌙
+====================================================
+
+The dark/light theme must persist after:
+• Page reload
+• Logout
+• Closing the browser
+
+Requirements:
+• Save theme in localStorage (theme = "dark" | "light")
+• On app start, read localStorage and apply theme automatically
+• Apply theme BEFORE React renders to avoid flicker
+
+If no preference exists → default to dark mode.
+
+====================================================
+2) CORREGIR LOGOUT 🚪
+====================================================
+
+Current behavior:
+Logout redirects to Attendance Terminal ❌
+
+New behavior:
+Logout must redirect to LOGIN PAGE.
+
+Flow:
+User clicks "Cerrar sesión"
+→ Delete JWT token
+→ Redirect to /login
+
+IMPORTANT:
+The public attendance screen must still be accessible,
+but logout should go to LOGIN.
+
+====================================================
+3) RESPONSIVE DESIGN COMPLETO 📱
+====================================================
+
+The app must work perfectly on:
+• Mobile phones
+• Tablets
+• Small laptops (1366x768)
+• Large screens
+
+Implement full responsive layout.
+
+====================================================
+4) SIDEBAR RESPONSIVE
+====================================================
+
+Desktop:
+• Normal sidebar
+
+Tablet:
+• Collapsible sidebar
+
+Mobile:
+• Hidden sidebar + hamburger menu
+
+====================================================
+5) TERMINAL RESPONSIVE ⌨️
+====================================================
+
+Attendance screen must adapt to mobile:
+• Keypad becomes larger buttons
+• Clock scales automatically
+• Document input full width
+• One-column layout on small screens
+
+====================================================
+6) DASHBOARD RESPONSIVE 📊
+====================================================
+
+Desktop:
+• Cards in one row
+
+Tablet:
+• Cards in 2 columns
+
+Mobile:
+• Cards in 1 column
+
+Charts:
+• Must resize automatically.
+
+====================================================
+7) TABLES RESPONSIVE 📋
+====================================================
+
+Employees & Reports tables:
+
+On mobile:
+• Convert tables into card layout
+• Each employee becomes a card
+• Actions stacked vertically
+
+====================================================
+WORKFLOW
+====================================================
+1) Implement theme persistence
+2) Fix logout redirect
+3) Add responsive breakpoints
+4) Adapt sidebar, terminal, dashboard and tables

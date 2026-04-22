@@ -1,0 +1,139 @@
+We must UPDATE the existing TimeTrack Pro project.
+Do NOT rebuild the project. Fix and extend the current code.
+
+====================================================
+1) BUG CRÍTICO — PERFIL DE EMPLEADOS NO CARGA ❌
+====================================================
+
+The employee profile page is currently broken and does not load.
+
+We must FIX the employee profile feature completely.
+
+Create endpoint:
+GET /employees/:document_number
+
+The profile page must load correctly and show FULL employee info.
+
+EMPLOYEE PROFILE MUST INCLUDE:
+
+Datos personales:
+• Nombre completo
+• Número de documento (cédula)
+• Email
+• Teléfono
+• Departamento
+• Cargo
+• Empresa
+
+Estado laboral:
+• Estado actual (Dentro / Fuera / Día libre)
+• Hora de entrada de hoy
+• Hora de salida de hoy
+• Horas trabajadas hoy
+• Horas extra hoy
+
+Historial reciente:
+• Últimos 7 días de asistencia
+• Lista de entradas/salidas recientes
+
+The page must work for:
+• Admin viewing employee
+• Employee viewing their own profile
+
+====================================================
+2) AUDITORÍA AVANZADA CON IP Y DISPOSITIVO 🔍
+====================================================
+
+Update audit log system.
+
+Create table:
+audit_logs:
+- id
+- user_id
+- company_id
+- action
+- ip_address
+- user_agent
+- device
+- created_at
+
+Backend must automatically log:
+• Login
+• Logout
+• Check-in
+• Check-out
+• CRUD employees
+• CRUD companies
+
+Extract automatically:
+• IP address from request
+• User-Agent header
+• Parse device type (Desktop / Mobile / Tablet)
+
+Create endpoint:
+GET /audit-logs
+
+Only SUPER_ADMIN and ADMIN can access.
+
+====================================================
+3) PANEL GLOBAL — NUEVAS HERRAMIENTAS EDUCATIVAS 🧠
+(SUPER_ADMIN ONLY)
+====================================================
+
+At the bottom of the Global Dashboard create a new section:
+
+"Herramientas Académicas"
+
+This section contains TWO mini calculators side by side.
+
+----------------------------------------------------
+A) Calculadora de Límites Matemáticos 📈
+----------------------------------------------------
+
+Create a simple UI that allows input:
+f(x) =
+x →
+
+Calculate approximate limit numerically using JavaScript.
+
+Example:
+lim x→2 of x^2 = 4
+
+Support basic functions:
+• Polynomials
+• sin(x)
+• cos(x)
+• ln(x)
+• sqrt(x)
+
+Show step-by-step approximation.
+
+----------------------------------------------------
+B) Calculadora de Cargas Eléctricas ⚡
+----------------------------------------------------
+
+Create Coulomb's Law calculator.
+
+Formula:
+F = k * |q1 * q2| / r²
+
+Inputs:
+• q1 (Coulombs)
+• q2 (Coulombs)
+• r (meters)
+
+Output:
+• Fuerza eléctrica (Newtons)
+
+Nice UI cards for both calculators.
+
+IMPORTANT:
+Only SUPER_ADMIN can see this section.
+
+====================================================
+WORKFLOW
+====================================================
+1) Fix employee profile backend endpoint
+2) Fix employee profile frontend page
+3) Implement audit logs with IP & device tracking
+4) Add calculators to global dashboard
