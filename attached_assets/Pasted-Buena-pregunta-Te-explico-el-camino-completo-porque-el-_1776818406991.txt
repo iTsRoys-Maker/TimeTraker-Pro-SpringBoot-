@@ -1,0 +1,137 @@
+Buena pregunta. Te explico el camino completo, porque el proyecto está montado para que el backend sea intercambiable — es justo el caso de uso de tener un contrato OpenAPI.
+
+1. Cómo está hoy la conexión
+El frontend (React) llama directamente a rutas relativas como /api/auth/login, /api/employees, etc. (lo ves en lib/api-client-react/src/generated/api.ts). Esas rutas se generan automáticamente desde el contrato lib/api-spec/openapi.yaml. El servidor Express actual simplemente las implementa.
+
+Eso significa: si tu Spring Boot expone los mismos endpoints bajo /api/..., el frontend ni se entera del cambio.
+
+2. Pasos para sustituir el backend
+a) Crear el proyecto Spring Boot
+Estructura recomendada:
+
+artifacts/api-server-java/
+├── pom.xml  (o build.gradle)
+├── src/main/java/com/timetrack/
+│   ├── TimeTrackApplication.java
+│   ├── config/  (SecurityConfig, CorsConfig, JwtConfig)
+│   ├── controllers/  (AuthController, EmployeesController, ...)
+│   ├── services/
+│   ├── entities/  (JPA: Company, User, Employee, AttendanceLog, ...)
+│   └── repositories/  (Spring Data JPA)
+└── src/main/resources/application.yml
+
+Dependencias clave en pom.xml:
+
+spring-boot-starter-web
+spring-boot-starter-data-jpa
+spring-boot-starter-security
+org.postgresql:postgresql
+io.jsonwebtoken:jjwt-api + jjwt-impl + jjwt-jackson
+org.springframework.boot:spring-boot-starter-validation
+b) Generar los controladores desde el OpenAPI
+No tienes que escribir las firmas a mano. Usa openapi-generator-maven-plugin apuntando a lib/api-spec/openapi.yaml:
+
+<plugin>
+  <groupId>org.openapitools</groupId>
+  <artifactId>openapi-generator-maven-plugin</artifactId>
+  <version>7.6.0</version>
+  <executions>
+    <execution>
+      <goals><goal>generate</goal></goals>
+      <configuration>
+        <inputSpec>${project.basedir}/../../lib/api-spec/openapi.yaml</inputSpec>
+        <generatorName>spring</generatorName>
+        <apiPackage>com.timetrack.api</apiPackage>
+        <modelPackage>com.timetrack.model</modelPackage>
+        <configOptions>
+          <interfaceOnly>true</interfaceOnly>
+          <useSpringBoot3>true</useSpringBoot3>
+          <useTags>true</useTags>
+        </configOptions>
+      </configuration>
+    </execution>
+  </executions>
+</plugin>
+
+Esto te genera interfaces (AuthApi, EmployeesApi, etc.) y DTOs que tus @RestController solo tienen que implementar. Si cambias el openapi.yaml, ambos lados (frontend y backend) se regeneran y siguen compatibles.
+
+c) Configuración mínima
+application.yml:
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api      # así todas las rutas viven bajo /api
+spring:
+  datasource:
+    url: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}
+    username: ${PGUSER}
+    password: ${PGPASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: validate    # nada de auto-create — el schema ya está en Postgres
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration: 86400000
+
+Las variables PGHOST/PGUSER/PGPASSWORD/PGDATABASE ya existen en este entorno (las creé al provisionar la base de datos), Spring Boot las lee directamente. Solo tendrías que añadir JWT_SECRET.
+
+Entidades JPA apuntando a las tablas existentes:
+
+@Entity @Table(name = "employees")
+public class Employee {
+  @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
+  @Column(name = "company_id") private Integer companyId;
+  @Column(name = "document_number", unique = true) private String documentNumber;
+  // ... resto de columnas igual al schema
+}
+
+CORS — solo necesario si Spring Boot corre en un dominio distinto al frontend. En este entorno, si lo corres en el mismo workspace bajo /api, no hace falta. Si lo despliegas aparte:
+
+@Configuration
+public class CorsConfig {
+  @Bean
+  public WebMvcConfigurer corsConfigurer() {
+    return new WebMvcConfigurer() {
+      @Override
+      public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+          .allowedOrigins("https://tu-frontend.replit.app")
+          .allowedMethods("*")
+          .allowCredentials(true);
+      }
+    };
+  }
+}
+
+d) Cambiar el workflow del API
+Reemplaza el comando del workflow API Server para que corra Maven en vez de Node:
+
+PORT=8080 mvn -f artifacts/api-server-java/pom.xml spring-boot:run
+
+(en este entorno, primero hay que instalar Java + Maven con el gestor de paquetes; cuando llegue el momento te lo dejo listo).
+
+e) Apagar el backend Node
+Una vez que el Spring Boot responda los mismos endpoints, simplemente eliminas o renombras artifacts/api-server/ y dejas solo el Java.
+
+3. Endpoints que tienes que implementar
+Sacados de openapi.yaml:
+
+Tag	Endpoints clave
+auth	POST /auth/login, GET /auth/me, POST /auth/logout
+companies	CRUD de /companies (solo super_admin)
+employees	CRUD de /employees, PUT /employees/{id}/pin
+attendance	POST /attendance/verify-identity, POST /attendance/punch
+users	CRUD de usuarios admin de la empresa
+dashboard	/dashboard/global-summary, /global-trends, /companies-breakdown
+workSchedule	GET/PUT del horario laboral
+audit	GET /audit/logs
+Cada endpoint tiene definido su request/response en el YAML — el generador te los crea como DTOs Java.
+
+4. Lo que NO tienes que tocar
+Base de datos — el schema PostgreSQL es el mismo, las tablas ya existen y los datos de prueba ya están sembrados.
+Frontend — sigue llamando a /api/..., no requiere ningún cambio.
+Contrato OpenAPI — es la fuente de verdad compartida.
+¿Quieres que te genere el esqueleto del proyecto Spring Boot (pom.xml, application.yml, entidades JPA mapeadas a las tablas existentes, SecurityConfig con JWT y un AuthController de ejemplo) dentro de artifacts/api-server-java/? Si me das luz verde lo dejo armado y configuro el workflow para que corra Maven en vez de Node.

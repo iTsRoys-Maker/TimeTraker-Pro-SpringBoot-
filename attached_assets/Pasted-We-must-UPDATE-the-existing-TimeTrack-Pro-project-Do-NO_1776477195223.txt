@@ -1,0 +1,160 @@
+We must UPDATE the existing TimeTrack Pro project.
+Do NOT rebuild the project. You must modify and extend the current code.
+
+IMPORTANT:
+From now on the entire application MUST be in SPANISH.
+All texts, labels, buttons, messages and tooltips must be translated.
+
+====================================================
+1) TRADUCIR TODA LA APLICACIÓN A ESPAÑOL 🌎
+====================================================
+
+Translate ALL UI texts to Spanish:
+
+Examples:
+Dashboard → Panel
+People → Empleados
+Reports → Reportes
+Settings → Configuración
+Check-in → Entrada
+Check-out → Salida
+Currently In → Dentro
+Active Today → Activos Hoy
+Today's Activity → Actividad de Hoy
+No activity recorded today → Sin actividad registrada hoy
+
+Apply translation across:
+• Navbar
+• Sidebar
+• Charts
+• Buttons
+• Forms
+• Tooltips
+• Toast notifications
+• Login page
+
+====================================================
+2) DATOS Y GRÁFICAS EN TIEMPO REAL 🔄
+====================================================
+
+All dashboard data must come from PostgreSQL via API.
+
+Create real-time updates using:
+• WebSockets OR polling every 30 seconds
+
+Dashboard must update automatically when:
+• An employee checks in/out
+• Employee is created/edited/deleted
+
+Charts must use real API data:
+GET /attendance/stats
+GET /attendance/today
+GET /employees/status
+
+====================================================
+3) TERMINAL — SOPORTE TECLADO FÍSICO ⌨️
+====================================================
+
+Attendance Terminal must allow:
+• Typing ID using physical keyboard
+• Still support on-screen keypad
+
+Keyboard rules:
+• Numbers append to input
+• Backspace deletes
+• Enter = Confirm check-in/out
+• Escape = Clear input
+
+====================================================
+4) CONTADOR DE TIEMPO TRABAJADO ⏱️
+====================================================
+
+In Employees page AND Reports page show:
+
+For each employee:
+• Hora de entrada de hoy
+• Tiempo trabajado en vivo (contador en tiempo real)
+• Estado actual:
+   - Dentro 🟢
+   - Fuera 🔴
+   - Día libre 🟡
+
+Timer must update every minute without reload.
+
+====================================================
+5) GESTIÓN DE JORNADA LABORAL (ADMIN) 🗓️
+====================================================
+
+Create new Settings section:
+"Jornada laboral"
+
+Admin can configure:
+• Hora inicio jornada
+• Hora fin jornada
+• Días laborales (L-V, L-S, etc.)
+• Minutos de tolerancia llegada tarde
+
+Create DB table:
+work_schedule:
+- id
+- start_time
+- end_time
+- work_days
+- late_tolerance_minutes
+
+Backend must validate:
+• Si llega tarde
+• Si está fuera de jornada
+• Si es día libre
+
+====================================================
+6) ESTADO AUTOMÁTICO DEL EMPLEADO 🟢🔴🟡
+====================================================
+
+Backend must calculate employee status:
+
+IF checked in and not checked out → "Dentro"
+IF last action is check-out → "Fuera"
+IF today not in work_days → "Día libre"
+
+Expose endpoint:
+GET /employees/status
+
+====================================================
+7) TERMINAL CON SIDEBAR COMPLETO 🧭
+====================================================
+
+The Terminal page must now show the FULL sidebar navigation.
+Remove kiosk-only layout.
+
+Users must navigate to:
+• Panel
+• Terminal
+• Empleados
+• Reportes
+• Configuración
+
+====================================================
+8) DASHBOARD 100% CONECTADO 🧠
+====================================================
+
+All dashboard cards must use real data:
+
+• Total empleados → DB count
+• Activos hoy → checked in today
+• Dentro ahora → currently inside
+• Entradas hoy → count today
+• Salidas hoy → count today
+• Ausentes hoy → scheduled but no check-in
+
+====================================================
+WORKFLOW
+====================================================
+
+1) Update backend endpoints
+2) Update frontend services
+3) Implement real-time updates
+4) Translate UI
+5) Implement work schedule system
+
+Start with backend changes first.

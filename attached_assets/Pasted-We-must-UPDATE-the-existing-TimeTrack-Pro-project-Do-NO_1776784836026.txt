@@ -1,0 +1,171 @@
+We must UPDATE the existing TimeTrack Pro project.
+Do NOT rebuild the app. Modify the current codebase.
+
+====================================================
+1) FIX NAVIGATION FROM TERMINAL → PANEL (CRITICAL)
+====================================================
+
+Problem:
+When entering the Attendance Terminal from the company panel,
+there is NO way to go back to the dashboard.
+
+We must separate PUBLIC TERMINAL vs ADMIN APP.
+
+New routes structure:
+
+PUBLIC ROUTE:
+• /terminal  → Public attendance screen (no sidebar)
+
+ADMIN ROUTES:
+• /app/dashboard
+• /app/employees
+• /app/reports
+• /app/users
+• /app/workshift
+• /app/settings
+
+When admin clicks "Abrir Terminal":
+→ Open /terminal in a NEW TAB.
+
+Add a button inside terminal:
+• Top-left small button "Modo Administrador"
+• Redirects to /login
+
+IMPORTANT:
+The terminal must NEVER show sidebar.
+
+====================================================
+2) FIX LAYOUT SIZE ISSUES
+====================================================
+
+Current problems:
+• Cards overflow
+• Sidebar overlaps content
+• Charts stretch incorrectly
+
+Add breakpoints:
+
+Mobile:   < 768px
+Tablet:   768px – 1024px
+Desktop:  > 1024px
+
+Implement:
+• Fluid containers
+• Max-width for dashboard
+• Chart container responsive height
+• Prevent overflow-x globally
+
+====================================================
+3) ROLE & PERMISSION MANAGEMENT (SUPER IMPORTANT)
+====================================================
+
+We now need RBAC (Role Based Access Control).
+
+ROLES:
+• Super Admin
+• Company Admin
+• Supervisor
+• Employee
+
+Create PERMISSIONS system.
+
+Permissions list:
+- view_dashboard
+- manage_employees
+- manage_users
+- manage_roles
+- view_reports
+- export_reports
+- manage_workshift
+- open_terminal
+- manage_company_settings
+
+Create new section:
+APP → Settings → Roles & Permissions
+
+Admin must be able to:
+• Create roles
+• Edit permissions per role
+• Assign roles to users
+
+====================================================
+4) MULTI-COMPANY PERMISSIONS
+====================================================
+
+We must support multiple companies.
+
+Each company has:
+• Users
+• Employees
+• Workshifts
+• Attendance logs
+
+Add:
+Company table + company_id relations.
+
+Super Admin can:
+• Create companies
+• Activate / deactivate companies
+• Assign Company Admin
+
+Company Admin can ONLY see their company data.
+
+====================================================
+5) SECURE ATTENDANCE (ANTI IMPERSONATION)
+====================================================
+
+CRITICAL SECURITY FEATURE.
+
+Problem:
+Anyone can type another employee ID.
+
+We must validate identity using TWO FACTORS:
+
+STEP 1 — Validate ID exists
+User enters national ID (cedula)
+
+STEP 2 — SECOND FACTOR (choose both):
+• Last 4 digits of phone OR
+• Personal PIN (4 digits)
+
+Flow:
+Enter cedula → system finds employee →
+Ask for PIN or phone digits →
+If match → allow clock in/out.
+
+If fails 3 times:
+• Lock for 60 seconds.
+
+Store:
+employee.pin_hash (bcrypt)
+
+====================================================
+6) AUDIT LOGS
+====================================================
+
+Create audit_logs table:
+
+Store:
+• user
+• action
+• timestamp
+• ip
+• company_id
+
+Log actions:
+• Login
+• Logout
+• Create employee
+• Edit employee
+• Role changes
+• Attendance attempts
+
+====================================================
+WORKFLOW ORDER
+====================================================
+1) Fix routing & terminal navigation
+2) Fix responsive layout
+3) Implement RBAC
+4) Implement multi-company
+5) Add secure attendance (PIN verification)
+6) Add audit logs

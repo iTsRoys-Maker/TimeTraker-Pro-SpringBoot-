@@ -1,0 +1,147 @@
+We must UPDATE the existing TimeTrack Pro project.
+Do NOT rebuild the app. Fix permissions and dashboards based on roles.
+
+====================================================
+1) ERROR ACTUAL A CORREGIR ❌
+====================================================
+
+Right now when logging as EMPLOYEE the user can see admin modules.
+THIS IS WRONG.
+
+We must enforce strict role-based UI and route protection.
+
+====================================================
+2) PERMISOS REALES POR ROL 🔐
+====================================================
+
+ROLES:
+
+SUPER_ADMIN
+ADMIN (company admin)
+EMPLOYEE (trabajador)
+
+----------------------------------------------------
+EMPLOYEE PERMISSIONS
+----------------------------------------------------
+Employee must ONLY access:
+
+• Attendance terminal
+• Personal profile page
+
+EMPLOYEE MUST NOT SEE:
+❌ Dashboard
+❌ Companies
+❌ Employees list
+❌ Reports
+❌ Work schedule
+❌ User management
+❌ Admin panels
+
+Sidebar for EMPLOYEE must contain ONLY:
+• Terminal
+• Mi Perfil
+• Cerrar sesión
+
+----------------------------------------------------
+ADMIN PERMISSIONS (empresa)
+----------------------------------------------------
+Admin can access:
+
+• Panel de control (empresa)
+• Empleados
+• Reportes
+• Jornada laboral
+• Usuarios de su empresa
+
+ADMIN MUST NOT SEE:
+❌ Companies page
+❌ Global statistics
+❌ Platform admins
+
+----------------------------------------------------
+SUPER_ADMIN PERMISSIONS
+----------------------------------------------------
+Super admin sees FULL platform:
+
+• Dashboard global
+• Companies page
+• All companies statistics
+• Company admins
+• Global metrics
+
+====================================================
+3) PROTEGER RUTAS EN BACKEND 🔒
+====================================================
+
+Create middleware:
+
+requireRole(["SUPER_ADMIN"])
+requireRole(["ADMIN"])
+requireRole(["EMPLOYEE"])
+
+All API endpoints must validate role AND company_id.
+
+====================================================
+4) PROTEGER RUTAS EN FRONTEND 🔒
+====================================================
+
+React must redirect automatically:
+
+EMPLOYEE trying to access /dashboard → redirect to /terminal
+EMPLOYEE trying to access /employees → redirect to /terminal
+EMPLOYEE trying to access /reports → redirect to /terminal
+
+ADMIN trying to access /companies → deny access.
+
+====================================================
+5) CORREGIR PANEL ACTUAL (BUG UI) 🧩
+====================================================
+
+Fix dashboard layout bug:
+Remove empty or misplaced cards/boxes.
+
+Cards must be aligned and responsive.
+
+====================================================
+6) CREAR DASHBOARD GLOBAL (SUPER ADMIN) 🌍
+====================================================
+
+Super Admin dashboard must show GLOBAL data:
+
+Create cards:
+• Total empresas
+• Total empleados (global)
+• Entradas hoy (global)
+• Empresas activas hoy
+
+Add charts:
+• Asistencia por empresa (últimos 7 días)
+• Empleados por empresa
+
+Add page:
+/companies → gestión completa de empresas
+
+====================================================
+7) DASHBOARD ADMIN EMPRESA 🏢
+====================================================
+
+Company admin dashboard must show:
+
+• Empleados totales de su empresa
+• Entradas hoy
+• Salidas hoy
+• Ausentes hoy
+• Asistencia últimos 7 días (solo su empresa)
+
+IMPORTANT:
+Admin dashboard MUST filter by company_id.
+
+====================================================
+WORKFLOW
+====================================================
+1) Fix backend role middleware
+2) Protect API routes
+3) Protect React routes
+4) Create Super Admin dashboard
+5) Fix Admin dashboard
+6) Create Employee limited sidebar

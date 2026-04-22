@@ -1,0 +1,240 @@
+We must UPDATE the existing TimeTrack Pro project.
+DO NOT rebuild the project. Modify and extend the current codebase.
+
+This is a MAJOR UPDATE that includes:
+• Multi-company SaaS architecture
+• Real role permissions
+• Attendance-first app flow
+• Real-time data
+• Terminal redesign
+• Work hours & overtime calculations
+
+====================================================
+0) REGLAS GENERALES
+====================================================
+• Use the existing React + Node + PostgreSQL project
+• Everything must remain in SPANISH
+• Remove demo / mock logic
+• All data must come from PostgreSQL
+• Use polling (30s) or WebSockets for real-time updates
+
+====================================================
+1) CAMBIAR FLUJO DE INICIO DE LA APP 🚪
+====================================================
+The app must NO LONGER open on login.
+
+NEW FLOW:
+App opens directly on PUBLIC ATTENDANCE SCREEN.
+
+This screen allows employees to register attendance using their CÉDULA.
+
+At the bottom add button:
+[ Acceder al Panel de Control ]
+
+Click → go to Login page.
+
+After login:
+• SUPER_ADMIN → platform dashboard
+• ADMIN → company dashboard
+
+Employees NEVER access dashboard.
+
+====================================================
+2) MULTIEMPRESA (MULTI-TENANT) 🏢
+====================================================
+
+Create table:
+companies:
+- id
+- name
+- email
+- created_at
+
+Update tables to include company_id:
+
+users:
+- id
+- company_id
+- role_id
+- name
+- email
+- password
+
+employees:
+- id
+- company_id
+- document_number
+- name
+- department
+- role
+
+attendance_logs:
+- id
+- company_id
+- employee_document
+- type (IN / OUT)
+- timestamp
+
+IMPORTANT:
+ALL queries MUST filter by company_id.
+Companies must NEVER see data from other companies.
+
+====================================================
+3) ROLES Y PERMISOS 🔐
+====================================================
+
+ROLES:
+
+SUPER_ADMIN
+• Manage companies
+• Manage admins
+• View global statistics
+
+ADMIN (company admin)
+• Manage employees
+• Reports
+• Work schedule
+• Full access inside company
+
+EMPLOYEE
+• Only attendance terminal
+
+Protect routes:
+/terminal → public
+/login → public
+/dashboard → ADMIN
+/companies → SUPER_ADMIN
+/employees → ADMIN
+/reports → ADMIN
+/work-schedule → ADMIN
+
+====================================================
+4) CREAR PANEL DE EMPRESAS (SUPER ADMIN)
+====================================================
+SUPER_ADMIN must:
+• Create company
+• Edit company
+• Delete company
+• Create company admin
+
+====================================================
+5) DASHBOARD — CORRECCIONES 📊
+====================================================
+REMOVE metric card:
+❌ "Dentro ahora"
+
+Keep cards (REAL TIME):
+• Total empleados
+• Activos hoy
+• Entradas hoy
+• Salidas hoy
+• Ausentes hoy
+
+Update automatically when attendance changes.
+
+====================================================
+6) EMPLEADOS — USAR CÉDULA COMO ID 🪪
+====================================================
+STOP using IDs like EMP001.
+
+Primary identifier:
+document_number (CÉDULA)
+
+Update everywhere:
+• DB
+• Terminal
+• Employees page
+• Attendance logs
+• APIs
+
+====================================================
+7) LOGIN — LIMPIEZA
+====================================================
+Remove hardcoded credentials.
+Login works ONLY with PostgreSQL users.
+
+Add button:
+[ Iniciar sesión ]
+[ Registrar asistencia ]
+
+Registrar asistencia → open attendance screen.
+
+====================================================
+8) NUEVA PANTALLA DE REGISTRO RÁPIDO
+====================================================
+
+Flow:
+1) Enter CÉDULA
+2) Backend checks today logs
+
+IF first record today → ENTRADA
+IF already checked-in → SALIDA
+
+Show result:
+• Entrada registrada ✔
+• Salida registrada ✔
+• Hora registrada
+• Tiempo trabajado hoy
+• Horas extra
+
+====================================================
+9) HORAS TRABAJADAS + HORAS EXTRA ⏱️
+====================================================
+
+worked_hours = last_checkout - first_checkin
+
+If > 8h:
+extra_hours = worked_hours - 8h
+
+Endpoint:
+GET /attendance/today-summary/:document
+
+Return:
+• check_in_time
+• check_out_time
+• worked_hours
+• extra_hours
+
+====================================================
+10) TERMINAL — REDISEÑO COMPLETO 🎨
+====================================================
+
+Create modern kiosk UI:
+• Large centered clock
+• Big document input
+• Large keypad
+• Success/error animations
+• Sound feedback
+
+Show after validation:
+• Employee name
+• Estado: Dentro / Fuera / Día libre
+
+====================================================
+11) VALIDACIONES TERMINAL
+====================================================
+Prevent:
+• Double check-in
+• Double check-out
+• Check-in outside work schedule (warning)
+
+====================================================
+12) TIEMPO REAL EN TODA LA APP 🔄
+====================================================
+Attendance changes must update:
+• Dashboard
+• Employees page
+• Reports
+
+Use polling (30s) or WebSockets.
+
+====================================================
+WORKFLOW
+====================================================
+1) Update DB schema
+2) Implement multi-tenant logic
+3) Implement role middleware
+4) Build Super Admin dashboard
+5) Update attendance logic
+6) Redesign terminal UI
+7) Connect real-time updates

@@ -1,0 +1,1310 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.2.0
+  description: TimeTrack Pro - Multi-tenant Attendance Control System API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+  - name: auth
+  - name: companies
+  - name: employees
+  - name: attendance
+  - name: users
+  - name: dashboard
+  - name: workSchedule
+  - name: audit
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: User login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Logged in successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /companies:
+    get:
+      operationId: listCompanies
+      tags: [companies]
+      summary: List all companies (super_admin only)
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of companies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CompanyWithStats"
+    post:
+      operationId: createCompany
+      tags: [companies]
+      summary: Create company (super_admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCompanyBody"
+      responses:
+        "201":
+          description: Company created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Company"
+
+  /companies/{id}:
+    patch:
+      operationId: updateCompany
+      tags: [companies]
+      summary: Update company (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCompanyBody"
+      responses:
+        "200":
+          description: Company updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Company"
+    delete:
+      operationId: deleteCompany
+      tags: [companies]
+      summary: Delete company (super_admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /employees:
+    get:
+      operationId: listEmployees
+      tags: [employees]
+      summary: List employees for current company
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, inactive]
+      responses:
+        "200":
+          description: List of employees
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Employee"
+    post:
+      operationId: createEmployee
+      tags: [employees]
+      summary: Create employee
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEmployeeBody"
+      responses:
+        "201":
+          description: Employee created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Employee"
+
+  /employees/status:
+    get:
+      operationId: getEmployeesStatus
+      tags: [employees]
+      summary: Get real-time attendance status of all employees
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Employee status list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EmployeeWithStatus"
+
+  /employees/profile/{document}:
+    get:
+      operationId: getEmployeeProfile
+      tags: [employees]
+      summary: Get rich employee profile by document number
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: document
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Employee profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmployeeProfile"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /employees/{id}:
+    get:
+      operationId: getEmployee
+      tags: [employees]
+      summary: Get employee by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Employee
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Employee"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateEmployee
+      tags: [employees]
+      summary: Update employee
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateEmployeeBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Employee"
+    delete:
+      operationId: deleteEmployee
+      tags: [employees]
+      summary: Delete employee
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /attendance/verify-identity:
+    post:
+      operationId: verifyIdentity
+      tags: [attendance]
+      summary: Step 1 — verify employee exists and return required second factor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [documentNumber]
+              properties:
+                documentNumber:
+                  type: string
+      responses:
+        "200":
+          description: Employee found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerifyIdentityResponse"
+        "404":
+          description: Employee not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "423":
+          description: Locked due to too many failed attempts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /attendance/punch:
+    post:
+      operationId: punch
+      tags: [attendance]
+      summary: Step 2 — record attendance punch with second factor (public)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PunchBody"
+      responses:
+        "200":
+          description: Punch recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PunchResponse"
+        "401":
+          description: Invalid second factor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PunchFailureResponse"
+        "404":
+          description: Employee not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "423":
+          description: Locked due to too many failed attempts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /attendance/today-summary/{document}:
+    get:
+      operationId: getTodaySummary
+      tags: [attendance]
+      summary: Get today attendance summary for employee
+      parameters:
+        - name: document
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Today summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TodaySummary"
+
+  /attendance/logs:
+    get:
+      operationId: listAttendanceLogs
+      tags: [attendance]
+      summary: List attendance logs
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: employeeId
+          in: query
+          schema:
+            type: integer
+        - name: startDate
+          in: query
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Attendance logs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AttendanceLogsResponse"
+
+  /attendance/today:
+    get:
+      operationId: getTodayActivity
+      tags: [attendance]
+      summary: Get today activity feed
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Today activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AttendanceLogWithEmployee"
+
+  /attendance/employee/{id}:
+    get:
+      operationId: getEmployeeAttendance
+      tags: [attendance]
+      summary: Get attendance history for employee
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: startDate
+          in: query
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Attendance logs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AttendanceLog"
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard summary metrics
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Dashboard metrics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /dashboard/attendance-trends:
+    get:
+      operationId: getAttendanceTrends
+      tags: [dashboard]
+      summary: Get 7-day attendance trends
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Attendance trends
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AttendanceTrendDay"
+
+  /dashboard/global-summary:
+    get:
+      operationId: getGlobalSummary
+      tags: [dashboard]
+      summary: Global platform summary (super_admin)
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Global summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GlobalSummary"
+
+  /dashboard/global-trends:
+    get:
+      operationId: getGlobalTrends
+      tags: [dashboard]
+      summary: Global 7-day attendance trends (super_admin)
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Global trends
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AttendanceTrendDay"
+
+  /dashboard/companies-breakdown:
+    get:
+      operationId: getCompaniesBreakdown
+      tags: [dashboard]
+      summary: Per-company attendance breakdown for today (super_admin)
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Companies breakdown
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CompanyBreakdown"
+
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: List users
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Users list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserSummary"
+    post:
+      operationId: createUser
+      tags: [users]
+      summary: Create user
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserBody"
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSummary"
+
+  /users/{id}:
+    delete:
+      operationId: deleteUser
+      tags: [users]
+      summary: Delete user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /work-schedule:
+    get:
+      operationId: getWorkSchedule
+      tags: [workSchedule]
+      summary: Get work schedule for current company
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Work schedule
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkSchedule"
+    put:
+      operationId: updateWorkSchedule
+      tags: [workSchedule]
+      summary: Update work schedule
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateWorkScheduleBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkSchedule"
+
+  /audit/logs:
+    get:
+      operationId: listAuditLogs
+      tags: [audit]
+      summary: List audit log entries
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: action
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Audit logs page
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditLogsPage"
+
+  /employees/{id}/pin:
+    put:
+      operationId: setEmployeePin
+      tags: [employees]
+      summary: Set or update an employee's PIN (4 digits)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [pin]
+              properties:
+                pin:
+                  type: string
+                  description: 4-digit numeric PIN
+      responses:
+        "200":
+          description: PIN updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Employee"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+
+    HealthStatus:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+
+    LoginBody:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    AuthResponse:
+      type: object
+      required: [token, user]
+      properties:
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/UserProfile"
+
+    UserProfile:
+      type: object
+      required: [id, email, name, role]
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+          enum: [super_admin, admin, employee]
+        companyId:
+          type: integer
+          nullable: true
+        createdAt:
+          type: string
+
+    UserSummary:
+      type: object
+      required: [id, email, name, role]
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+          enum: [super_admin, admin, employee]
+        companyId:
+          type: integer
+          nullable: true
+        createdAt:
+          type: string
+
+    CreateUserBody:
+      type: object
+      required: [email, password, name, role]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+          enum: [super_admin, admin, employee]
+
+    Company:
+      type: object
+      required: [id, name, email, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        createdAt:
+          type: string
+
+    CompanyWithStats:
+      type: object
+      required: [id, name, email, createdAt, employeeCount, adminCount]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        createdAt:
+          type: string
+        employeeCount:
+          type: integer
+        adminCount:
+          type: integer
+
+    CreateCompanyBody:
+      type: object
+      required: [name, email]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        adminName:
+          type: string
+        adminEmail:
+          type: string
+        adminPassword:
+          type: string
+
+    UpdateCompanyBody:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+
+    Employee:
+      type: object
+      required: [id, companyId, documentNumber, name, position, department, status]
+      properties:
+        id:
+          type: integer
+        companyId:
+          type: integer
+        documentNumber:
+          type: string
+        name:
+          type: string
+        position:
+          type: string
+        department:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive]
+        email:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    EmployeeWithStatus:
+      allOf:
+        - $ref: "#/components/schemas/Employee"
+        - type: object
+          required: [attendanceStatus]
+          properties:
+            attendanceStatus:
+              type: string
+              enum: [inside, outside, absent, day_off]
+            lastCheckIn:
+              type: string
+              nullable: true
+            lastLogTime:
+              type: string
+              nullable: true
+
+    CreateEmployeeBody:
+      type: object
+      required: [documentNumber, name, position, department]
+      properties:
+        documentNumber:
+          type: string
+        name:
+          type: string
+        position:
+          type: string
+        department:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive]
+
+    UpdateEmployeeBody:
+      type: object
+      properties:
+        documentNumber:
+          type: string
+        name:
+          type: string
+        position:
+          type: string
+        department:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive]
+
+    PunchBody:
+      type: object
+      required: [documentNumber]
+      properties:
+        documentNumber:
+          type: string
+        pin:
+          type: string
+          description: 4-digit personal PIN (preferred second factor)
+        phoneLast4:
+          type: string
+          description: Last 4 digits of phone (alternative second factor)
+
+    VerifyIdentityResponse:
+      type: object
+      required: [employeeId, employeeName, requiresPin, requiresPhoneLast4]
+      properties:
+        employeeId:
+          type: integer
+        employeeName:
+          type: string
+        department:
+          type: string
+        requiresPin:
+          type: boolean
+        requiresPhoneLast4:
+          type: boolean
+
+    PunchFailureResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+        attemptsRemaining:
+          type: integer
+        lockedUntil:
+          type: string
+          nullable: true
+
+    TodaySummaryData:
+      type: object
+      required: [workedHours, extraHours]
+      properties:
+        checkInTime:
+          type: string
+          nullable: true
+        checkOutTime:
+          type: string
+          nullable: true
+        workedHours:
+          type: number
+        extraHours:
+          type: number
+
+    PunchResponse:
+      type: object
+      required: [type, employee, log, message, todaySummary]
+      properties:
+        type:
+          type: string
+          enum: [check_in, check_out]
+        employee:
+          $ref: "#/components/schemas/Employee"
+        log:
+          $ref: "#/components/schemas/AttendanceLog"
+        message:
+          type: string
+        todaySummary:
+          $ref: "#/components/schemas/TodaySummaryData"
+
+    TodaySummary:
+      type: object
+      required: [employee, workedHours, extraHours]
+      properties:
+        employee:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+            department:
+              type: string
+            documentNumber:
+              type: string
+        checkInTime:
+          type: string
+          nullable: true
+        checkOutTime:
+          type: string
+          nullable: true
+        workedHours:
+          type: number
+        extraHours:
+          type: number
+
+    AttendanceLog:
+      type: object
+      required: [id, companyId, employeeId, type, timestamp]
+      properties:
+        id:
+          type: integer
+        companyId:
+          type: integer
+        employeeId:
+          type: integer
+        type:
+          type: string
+          enum: [check_in, check_out]
+        timestamp:
+          type: string
+        notes:
+          type: string
+          nullable: true
+
+    AttendanceLogWithEmployee:
+      allOf:
+        - $ref: "#/components/schemas/AttendanceLog"
+        - type: object
+          properties:
+            employee:
+              $ref: "#/components/schemas/Employee"
+
+    AttendanceLogsResponse:
+      type: object
+      required: [logs, total, page, limit]
+      properties:
+        logs:
+          type: array
+          items:
+            $ref: "#/components/schemas/AttendanceLogWithEmployee"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    DashboardSummary:
+      type: object
+      required: [totalEmployees, activeToday, checkInsToday, checkOutsToday, absentToday]
+      properties:
+        totalEmployees:
+          type: integer
+        activeToday:
+          type: integer
+        checkInsToday:
+          type: integer
+        checkOutsToday:
+          type: integer
+        absentToday:
+          type: integer
+
+    AttendanceTrendDay:
+      type: object
+      required: [date, checkIns, checkOuts]
+      properties:
+        date:
+          type: string
+        checkIns:
+          type: integer
+        checkOuts:
+          type: integer
+
+    GlobalSummary:
+      type: object
+      required: [totalCompanies, totalEmployees, checkInsToday, checkOutsToday, activeCompaniesToday]
+      properties:
+        totalCompanies:
+          type: integer
+        totalEmployees:
+          type: integer
+        checkInsToday:
+          type: integer
+        checkOutsToday:
+          type: integer
+        activeCompaniesToday:
+          type: integer
+
+    CompanyBreakdown:
+      type: object
+      required: [companyId, companyName, employees, checkInsToday, checkOutsToday]
+      properties:
+        companyId:
+          type: integer
+        companyName:
+          type: string
+        employees:
+          type: integer
+        checkInsToday:
+          type: integer
+        checkOutsToday:
+          type: integer
+
+    WorkSchedule:
+      type: object
+      required: [id, startTime, endTime, workDays, lateToleranceMinutes]
+      properties:
+        id:
+          type: integer
+        companyId:
+          type: integer
+          nullable: true
+        startTime:
+          type: string
+        endTime:
+          type: string
+        workDays:
+          type: array
+          items:
+            type: string
+        lateToleranceMinutes:
+          type: integer
+
+    UpdateWorkScheduleBody:
+      type: object
+      required: [startTime, endTime, workDays]
+      properties:
+        startTime:
+          type: string
+        endTime:
+          type: string
+        workDays:
+          type: array
+          items:
+            type: string
+        lateToleranceMinutes:
+          type: integer
+
+    AuditLog:
+      type: object
+      required: [id, action, timestamp]
+      properties:
+        id:
+          type: integer
+        companyId:
+          type: integer
+          nullable: true
+        userId:
+          type: integer
+          nullable: true
+        userEmail:
+          type: string
+          nullable: true
+        action:
+          type: string
+        resource:
+          type: string
+          nullable: true
+        resourceId:
+          type: string
+          nullable: true
+        details:
+          type: string
+          nullable: true
+        ipAddress:
+          type: string
+          nullable: true
+        userAgent:
+          type: string
+          nullable: true
+        device:
+          type: string
+          nullable: true
+        timestamp:
+          type: string
+
+    EmployeeProfile:
+      type: object
+      required: [id, companyId, documentNumber, name, position, department, status, attendanceStatus, workedHoursToday, extraHoursToday, recentLogs]
+      properties:
+        id:
+          type: integer
+        companyId:
+          type: integer
+        companyName:
+          type: string
+          nullable: true
+        documentNumber:
+          type: string
+        name:
+          type: string
+        position:
+          type: string
+        department:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive]
+        email:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        attendanceStatus:
+          type: string
+          enum: [inside, outside, absent, day_off]
+        checkInTime:
+          type: string
+          nullable: true
+        checkOutTime:
+          type: string
+          nullable: true
+        workedHoursToday:
+          type: number
+        extraHoursToday:
+          type: number
+        recentLogs:
+          type: array
+          items:
+            type: object
+            required: [id, type, timestamp]
+            properties:
+              id:
+                type: integer
+              type:
+                type: string
+                enum: [check_in, check_out]
+              timestamp:
+                type: string
+              notes:
+                type: string
+                nullable: true
+
+    AuditLogsPage:
+      type: object
+      required: [logs, total, page, limit]
+      properties:
+        logs:
+          type: array
+          items:
+            $ref: "#/components/schemas/AuditLog"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
