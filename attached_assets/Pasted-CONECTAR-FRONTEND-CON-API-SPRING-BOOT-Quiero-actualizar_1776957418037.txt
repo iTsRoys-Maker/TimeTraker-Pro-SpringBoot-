@@ -1,0 +1,99 @@
+CONECTAR FRONTEND CON API SPRING BOOT
+
+Quiero actualizar el proyecto para que siga una arquitectura profesional de 3 capas:
+
+DATABASE → API → FRONTEND (GUI)
+
+El frontend NO debe tener lógica de negocio ni conexión directa a la base de datos.
+Toda la información debe obtenerse exclusivamente consumiendo la API REST del backend Spring Boot.
+
+IMPORTANTE:
+No reconstruyas el proyecto. Solo modifica lo necesario para reemplazar mocks/datos locales por consumo real de API.
+
+OBJETIVO GENERAL
+
+Migrar el frontend para que consuma el backend Java Spring Boot que corre en:
+
+http://localhost:8080/api
+
+Toda la app debe funcionar únicamente mediante peticiones HTTP (fetch/axios).
+
+1️⃣ CREAR CAPA DE SERVICIOS API EN EL FRONTEND
+
+Crear una carpeta:
+
+src/services/
+
+Dentro crear un cliente HTTP centralizado (api client) que:
+
+Use fetch o axios
+Tenga una BASE_URL configurable por variable de entorno
+Lea el token JWT desde localStorage
+Envíe automáticamente el header Authorization: Bearer
+
+Variable de entorno frontend:
+VITE_API_URL=http://localhost:8080/api
+
+2️⃣ ELIMINAR DATOS MOCK Y ESTADOS LOCALES
+
+Buscar y eliminar cualquier:
+
+mock data
+fake services
+data.ts
+datos hardcodeados
+lógica que simule backend
+
+Toda la data debe venir de la API.
+
+3️⃣ ENDPOINTS QUE EL FRONTEND DEBE CONSUMIR
+
+Usar estos endpoints reales:
+
+AUTH
+POST /auth/login
+
+EMPLOYEES
+GET /employees
+GET /employees/{document}
+
+ATTENDANCE
+POST /attendance/register
+GET /attendance/today-summary/{document}
+
+DASHBOARD
+GET /dashboard/summary
+GET /dashboard/attendance-trends
+
+COMPANIES
+GET /companies
+
+AUDIT
+GET /audit/logs
+
+4️⃣ ACTUALIZAR AUTENTICACIÓN
+
+El login debe:
+
+Enviar credenciales al backend
+Recibir JWT
+Guardarlo en localStorage
+Usarlo en todas las peticiones posteriores
+
+Eliminar cualquier autenticación simulada del frontend.
+
+5️⃣ MODO DESARROLLO
+
+El frontend debe poder correr en desarrollo usando:
+
+Backend → localhost:8080
+Frontend → puerto de Vite
+
+Configurar proxy si es necesario para evitar CORS.
+
+6️⃣ OBJETIVO FINAL
+
+El frontend debe quedar completamente desacoplado de la base de datos.
+Toda la lógica debe depender únicamente de la API.
+
+Esto es un cambio de fuente de datos, no un rediseño visual.
