@@ -1,0 +1,109 @@
+import bcrypt from "bcryptjs";
+import {
+  db,
+  companiesTable,
+  usersTable,
+  employeesTable,
+  attendanceLogsTable,
+  workScheduleTable,
+} from "@workspace/db";
+import { logger } from "./lib/logger";
+
+export async function bootstrapSeedIfEmpty(): Promise<void> {
+  const existing = await db.select().from(usersTable).limit(1);
+  if (existing.length > 0) {
+    logger.info("bootstrap-seed: users table not empty, skipping");
+    return;
+  }
+
+  logger.warn("bootstrap-seed: empty database detected, seeding demo data");
+
+  const [company] = await db
+    .insert(companiesTable)
+    .values({ name: "Empresa Demo S.A.", email: "contacto@empresa-demo.com" })
+    .returning();
+
+  await db.insert(usersTable).values({
+    email: "super@timetrack.com",
+    passwordHash: await bcrypt.hash("super123", 10),
+    name: "Super Administrador",
+    role: "super_admin",
+    companyId: null,
+  });
+
+  await db.insert(usersTable).values({
+    email: "admin@empresa-demo.com",
+    passwordHash: await bcrypt.hash("admin123", 10),
+    name: "Administrador Demo",
+    role: "admin",
+    companyId: company.id,
+  });
+
+  const employeesData = [
+    { documentNumber: "12345678", name: "Carlos Pérez", position: "Desarrollador Senior", department: "Tecnología", email: "c.perez@empresa-demo.com" },
+    { documentNumber: "23456789", name: "María García", position: "Analista de RRHH", department: "Recursos Humanos", email: "m.garcia@empresa-demo.com" },
+    { documentNumber: "34567890", name: "Juan López", position: "Asesor Comercial", department: "Ventas", email: "j.lopez@empresa-demo.com" },
+    { documentNumber: "45678901", name: "Ana Martínez", position: "Contadora", department: "Finanzas", email: "a.martinez@empresa-demo.com" },
+    { documentNumber: "56789012", name: "Pedro Ramírez", position: "Técnico de IT", department: "Tecnología", email: "p.ramirez@empresa-demo.com" },
+    { documentNumber: "67890123", name: "Laura Torres", position: "Coordinadora de Operaciones", department: "Operaciones", email: "l.torres@empresa-demo.com" },
+    { documentNumber: "78901234", name: "Diego Sánchez", position: "Gerente de Proyectos", department: "Dirección", email: "d.sanchez@empresa-demo.com" },
+  ];
+
+  const employees: { id: number }[] = [];
+  for (const emp of employeesData) {
+    const [e] = await db
+      .insert(employeesTable)
+      .values({ ...emp, companyId: company.id })
+      .returning();
+    employees.push(e);
+  }
+
+  await db.insert(workScheduleTable).values({
+    companyId: company.id,
+    startTime: "08:00",
+    endTime: "17:00",
+    workDays: ["mon", "tue", "wed", "thu", "fri"],
+    lateToleranceMinutes: 15,
+  });
+
+  const now = new Date();
+  for (let dayOffset = 6; dayOffset >= 0; dayOffset--) {
+    const day = new Date(now);
+    day.setDate(day.getDate() - dayOffset);
+    const dow = day.getDay();
+    if (dow === 0 || dow === 6) continue;
+
+    const present = employees.filter((_, i) => (i + dayOffset) % 7 !== 0);
+    for (const emp of present) {
+      const inH = 7 + Math.floor(Math.random() * 2);
+      const inM = Math.floor(Math.random() * 59);
+      const inT = new Date(day);
+      inT.setHours(inH, inM, 0, 0);
+      await db.insert(attendanceLogsTable).values({
+        companyId: company.id,
+        employeeId: emp.id,
+        type: "check_in",
+        timestamp: inT,
+      });
+
+      const isToday = dayOffset === 0;
+      const hasOut = !isToday || Math.random() > 0.5;
+      if (hasOut) {
+        const outH = 16 + Math.floor(Math.random() * 3);
+        const outM = Math.floor(Math.random() * 59);
+        const outT = new Date(day);
+        outT.setHours(outH, outM, 0, 0);
+        await db.insert(attendanceLogsTable).values({
+          companyId: company.id,
+          employeeId: emp.id,
+          type: "check_out",
+          timestamp: outT,
+        });
+      }
+    }
+  }
+
+  logger.warn(
+    "bootstrap-seed: demo data created. Logins: super@timetrack.com/super123, admin@empresa-demo.com/admin123",
+  );
+}
