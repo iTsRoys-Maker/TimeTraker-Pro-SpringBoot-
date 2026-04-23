@@ -2,10 +2,7 @@
 
 Sistema de gestión de ingresos empresariales desplegado en web.
 
-El proyecto está dividido en dos partes principales:
-
-- **Frontend** (`apps/frontend`) — aplicación web construida con React + Vite + TailwindCSS.
-- **Backend** (`apps/backend`) — API REST construida con Spring Boot 3 (Java 21) y PostgreSQL.
+El proyecto está claramente dividido en **frontend** y **backend**, cada uno en su propia carpeta en la raíz del repositorio.
 
 ---
 
@@ -13,14 +10,32 @@ El proyecto está dividido en dos partes principales:
 
 ```
 TimeTraker-Pro/
-├── apps/
-│   ├── frontend/          # Aplicación web (React + Vite)
-│   └── backend/           # API REST (Spring Boot + Java 21)
+├── frontend/              # Aplicación web (React + Vite + TypeScript)
+│   ├── src/
+│   ├── public/
+│   ├── index.html
+│   ├── package.json
+│   ├── vite.config.ts
+│   ├── nginx.conf         # Configuración para servir el frontend en producción
+│   └── Dockerfile
+│
+├── backend/               # API REST (Spring Boot 3 + Java 21)
+│   ├── src/
+│   │   └── main/
+│   │       ├── java/      # Código fuente Java
+│   │       └── resources/
+│   │           ├── application.yml
+│   │           ├── openapi.yaml
+│   │           └── schema.sql
+│   ├── pom.xml
+│   └── Dockerfile
+│
 ├── packages/              # Librerías compartidas (api-client, api-spec, db, etc.)
-├── artifacts/             # Artefactos auxiliares (sandbox de mockups, etc.)
+├── artifacts/             # Artefactos auxiliares (sandbox, etc.)
 ├── scripts/               # Scripts utilitarios
-├── pnpm-workspace.yaml    # Configuración del monorepo pnpm
-├── package.json           # Scripts raíz del workspace
+├── docker-compose.yml     # Orquesta frontend + backend + PostgreSQL
+├── .env.example           # Plantilla de variables de entorno
+├── package.json
 └── README.md
 ```
 
@@ -28,31 +43,27 @@ TimeTraker-Pro/
 
 ## Requisitos previos
 
-Para ejecutar el proyecto en otro host necesitas tener instalado:
+### Para ejecución con Docker (recomendado)
+- **Docker** ≥ 24
+- **Docker Compose** ≥ 2
 
-### Generales
-- **Git** ≥ 2.30
-- **Sistema operativo:** Linux, macOS o Windows (WSL recomendado)
-
-### Frontend
-- **Node.js** ≥ 20 (recomendado 22 o 24)
+### Para ejecución manual
+- **Node.js** ≥ 20 (recomendado 22)
 - **pnpm** ≥ 10  (`npm install -g pnpm`)
-
-### Backend
 - **Java JDK** 21
-- **Maven** ≥ 3.9 (o usar el `mvnw` incluido si existe)
-- **PostgreSQL** ≥ 14 corriendo en local o accesible por red
+- **Maven** ≥ 3.9
+- **PostgreSQL** ≥ 14
 
 ---
 
-## Dependencias del frontend (`apps/frontend`)
+## Dependencias del frontend (`frontend/`)
 
-Stack: **React 18 + Vite + TypeScript + TailwindCSS + Radix UI**
+Stack: **React + Vite + TypeScript + TailwindCSS + Radix UI**
 
-Dependencias de runtime:
+Runtime:
 - `react`, `react-dom`
 - `wouter` — enrutado
-- `@tanstack/react-query` — manejo de estado/servidor
+- `@tanstack/react-query` — estado/servidor
 - `react-hook-form`, `@hookform/resolvers`, `zod` — formularios y validación
 - `tailwindcss`, `@tailwindcss/vite`, `@tailwindcss/typography`, `tailwind-merge`, `tw-animate-css`, `class-variance-authority`, `clsx`
 - `@radix-ui/react-*` — accordion, alert-dialog, avatar, checkbox, dialog, dropdown-menu, popover, select, tabs, toast, tooltip, etc.
@@ -63,67 +74,80 @@ Dependencias de runtime:
 - `sonner`, `vaul`, `cmdk`, `embla-carousel-react`, `input-otp`, `react-resizable-panels`, `next-themes`
 - `katex`, `mathjs` — fórmulas matemáticas
 
-Dependencias de desarrollo:
+Desarrollo:
 - `vite`, `@vitejs/plugin-react`
 - `typescript`, `@types/react`, `@types/react-dom`, `@types/node`
 
-Instalación:
-```bash
-pnpm install
-```
-
 ---
 
-## Dependencias del backend (`apps/backend`)
+## Dependencias del backend (`backend/`)
 
 Stack: **Spring Boot 3.3.5 + Java 21 + PostgreSQL + JWT**
 
-Dependencias declaradas en `pom.xml`:
+Definidas en `pom.xml`:
 - `spring-boot-starter-web` — API REST
 - `spring-boot-starter-data-jpa` — persistencia con JPA/Hibernate
 - `spring-boot-starter-security` — seguridad
 - `spring-boot-starter-validation` — validación de DTOs
 - `org.postgresql:postgresql` — driver de PostgreSQL
 - `io.jsonwebtoken:jjwt-api / jjwt-impl / jjwt-jackson` (v0.12.6) — autenticación JWT
-- `org.projectlombok:lombok` — boilerplate
+- `org.projectlombok:lombok` — reducción de boilerplate
 - `spring-boot-starter-test`, `spring-security-test` — pruebas
 - `org.openapitools:openapi-generator-maven-plugin` (v7.6.0) — generación de interfaces a partir de `openapi.yaml`
-
-Instalación / build:
-```bash
-cd apps/backend
-mvn clean install
-```
 
 ---
 
 ## Variables de entorno
 
-Crea un archivo `.env` (o configura las variables del sistema) con al menos:
+Copia `.env.example` a `.env` y ajusta los valores:
 
-### Frontend
-```env
-PORT=5173
-BASE_PATH=/
-VITE_API_URL=http://localhost:8080
+```bash
+cp .env.example .env
 ```
 
-### Backend (`apps/backend/src/main/resources/application.properties` o variables de entorno)
-```env
-SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/timetracker
-SPRING_DATASOURCE_USERNAME=postgres
-SPRING_DATASOURCE_PASSWORD=tu_password
-SPRING_JPA_HIBERNATE_DDL_AUTO=update
-JWT_SECRET=cadena_secreta_larga_y_segura
-JWT_EXPIRATION_MS=86400000
-SERVER_PORT=8080
-```
+Variables principales:
 
-> El archivo `.env` está en `.gitignore`, no se sube al repositorio.
+| Variable | Descripción | Valor por defecto |
+| --- | --- | --- |
+| `PGHOST` | Host de PostgreSQL | `localhost` (en Docker: `db`) |
+| `PGPORT` | Puerto de PostgreSQL | `5432` |
+| `PGDATABASE` | Nombre de la base de datos | `timetrack` |
+| `PGUSER` | Usuario de PostgreSQL | `postgres` |
+| `PGPASSWORD` | Contraseña de PostgreSQL | `postgres` |
+| `JWT_SECRET` | Secreto para firmar tokens JWT (≥ 32 bytes) | — |
+| `CORS_ALLOWED_ORIGINS` | Orígenes permitidos por CORS | `http://localhost:5173` |
+| `PORT` | Puerto del frontend Vite | `5173` |
+| `BASE_PATH` | Ruta base del frontend | `/` |
+| `VITE_API_URL` | URL del backend para el frontend | `http://localhost:8080` |
 
 ---
 
-## Cómo ejecutar el proyecto en otro host
+## Ejecutar el proyecto
+
+### Opción 1 — Con Docker (todo en uno)
+
+Levanta frontend, backend y PostgreSQL con un solo comando:
+
+```bash
+docker compose up --build
+```
+
+Cuando termine de construir:
+- Frontend → `http://localhost`
+- Backend  → `http://localhost:8080/api`
+- Postgres → `localhost:5432`
+
+Para detener:
+```bash
+docker compose down
+```
+
+Para eliminar también los datos de la base de datos:
+```bash
+docker compose down -v
+```
+
+### Opción 2 — Manual
 
 1. **Clonar el repositorio**
    ```bash
@@ -131,31 +155,27 @@ SERVER_PORT=8080
    cd TimeTraker-Pro
    ```
 
-2. **Instalar dependencias del frontend**
-   ```bash
-   pnpm install
-   ```
-
-3. **Crear y configurar la base de datos PostgreSQL**
+2. **Crear la base de datos**
    ```sql
-   CREATE DATABASE timetracker;
+   CREATE DATABASE timetrack;
    ```
 
-4. **Configurar variables de entorno** (ver sección anterior).
+3. **Configurar variables de entorno** (`cp .env.example .env`).
 
-5. **Levantar el backend**
+4. **Levantar el backend**
    ```bash
-   pnpm run dev:backend
-   # o, manualmente:
-   cd apps/backend && mvn spring-boot:run
+   cd backend
+   mvn spring-boot:run
    ```
-   El backend quedará escuchando en `http://localhost:8080`.
+   Disponible en `http://localhost:8080/api`.
 
-6. **Levantar el frontend** (en otra terminal)
+5. **Levantar el frontend** (en otra terminal)
    ```bash
-   pnpm run dev:frontend
+   cd frontend
+   pnpm install
+   PORT=5173 BASE_PATH=/ pnpm run dev
    ```
-   El frontend quedará disponible en `http://localhost:5173` (o el puerto definido en `PORT`).
+   Disponible en `http://localhost:5173`.
 
 ---
 
@@ -163,29 +183,39 @@ SERVER_PORT=8080
 
 ### Frontend
 ```bash
-pnpm --filter @timetraker/frontend run build
+cd frontend
+pnpm install
+PORT=5173 BASE_PATH=/ pnpm run build
 ```
-Genera la salida estática en `apps/frontend/dist/`.
+Genera la salida estática en `frontend/dist/`.
 
 ### Backend
 ```bash
-cd apps/backend
+cd backend
 mvn clean package -DskipTests
 java -jar target/api-server-0.0.1-SNAPSHOT.jar
 ```
 
 ---
 
-## Despliegue
+## Despliegue en otro host
 
-- **Frontend:** se puede publicar en Vercel, Netlify, Cloudflare Pages o cualquier servidor estático sirviendo el contenido de `apps/frontend/dist/`. Recuerda definir `VITE_API_URL` apuntando al backend en producción.
-- **Backend:** se puede desplegar como contenedor Docker (hay un `Dockerfile` en `apps/backend/`) en Railway, Render, Fly.io, AWS, etc. Asegúrate de configurar las variables de entorno y la conexión a PostgreSQL en el host de destino.
+### Con Docker (más simple)
+1. Copia el repositorio al servidor.
+2. Crea el archivo `.env` con los valores de producción.
+3. Ejecuta:
+   ```bash
+   docker compose up -d --build
+   ```
+
+### Sin Docker
+- **Frontend:** publica `frontend/dist/` en Vercel, Netlify, Cloudflare Pages o cualquier servidor estático. Define `VITE_API_URL` apuntando al backend en producción.
+- **Backend:** despliega el `.jar` en Render, Railway, Fly.io, AWS, etc. Configura las variables de entorno y la conexión a PostgreSQL en el host de destino.
 
 ---
 
 ## Archivos ignorados por Git
 
-El `.gitignore` excluye:
 ```
 .env
 node_modules/
@@ -205,5 +235,5 @@ Definidos en el `package.json` raíz:
 | --- | --- |
 | `pnpm run dev:frontend` | Levanta el frontend en modo desarrollo |
 | `pnpm run dev:backend`  | Levanta el backend Spring Boot |
-| `pnpm run build`        | Compila todos los paquetes del workspace |
-| `pnpm run typecheck`    | Verifica tipos de TypeScript en todo el monorepo |
+| `pnpm run build`        | Compila todos los paquetes |
+| `pnpm run typecheck`    | Verifica tipos de TypeScript |

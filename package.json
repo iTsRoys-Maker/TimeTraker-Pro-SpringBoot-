@@ -7,8 +7,8 @@
     "build": "pnpm run typecheck && pnpm -r --if-present run build",
     "typecheck:libs": "tsc --build",
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck",
-    "dev:frontend": "pnpm -C apps/frontend dev",
-    "dev:backend": "cd apps/backend && mvn spring-boot:run"
+    "dev:frontend": "pnpm -C frontend dev",
+    "dev:backend": "cd backend && mvn spring-boot:run"
   },
   "private": true,
   "devDependencies": {
