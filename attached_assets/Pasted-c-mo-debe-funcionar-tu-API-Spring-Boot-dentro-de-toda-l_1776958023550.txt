@@ -1,0 +1,203 @@
+cómo debe funcionar tu API Spring Boot dentro de toda la arquitectura que estamos montando.
+
+Esto es clave porque tu frontend ya va a empezar a depender totalmente de ella.
+
+🧠 Qué es tu API en este proyecto
+
+Tu backend Spring Boot será:
+
+👉 El cerebro completo del sistema
+👉 El único que habla con PostgreSQL (JDBC)
+👉 El único que tiene la lógica de negocio
+👉 El único que decide qué datos ve cada usuario
+
+El frontend solo hace preguntas y muestra respuestas.
+
+🔁 Flujo real completo del sistema
+Ejemplo 1 — Login admin
+
+1️⃣ Frontend envía credenciales:
+
+POST /api/auth/login
+
+Body:
+
+{
+  "email": "admin@empresa.com",
+  "password": "1234"
+}
+
+2️⃣ Backend hace:
+
+Busca usuario en BD
+Verifica contraseña
+Genera JWT
+Devuelve token
+
+Respuesta:
+
+{
+  "token": "eyJhbGciOiJIUzI1NiIs..."
+}
+
+3️⃣ Frontend guarda token en localStorage
+4️⃣ Todas las siguientes peticiones van con:
+
+Authorization: Bearer TOKEN
+Ejemplo 2 — Cargar Dashboard
+
+Frontend pide:
+
+GET /api/dashboard/summary
+
+Backend:
+
+Lee JWT
+Detecta rol (admin o super_admin)
+Consulta PostgreSQL
+Calcula métricas en tiempo real
+Devuelve JSON
+
+Respuesta ejemplo:
+
+{
+  "totalEmployees": 32,
+  "activeToday": 25,
+  "checkInsToday": 28,
+  "checkOutsToday": 21,
+  "absentToday": 7
+}
+
+Frontend solo muestra tarjetas.
+
+Ejemplo 3 — Registrar asistencia (sin login)
+
+Empleado escribe su cédula en la terminal.
+
+Frontend envía:
+
+POST /api/attendance/register
+{
+  "documentNumber": "12345678"
+}
+
+Backend decide TODO:
+
+Busca empleado
+Mira registros del día
+Decide:
+Si no ha marcado → ENTRADA
+Si ya marcó → SALIDA
+Calcula horas trabajadas
+Calcula horas extra
+Guarda registro en BD
+Devuelve resultado
+
+Respuesta:
+
+{
+  "type": "CHECK_IN",
+  "message": "Entrada registrada",
+  "workedHours": 0,
+  "extraHours": 0
+}
+
+Esto es lógica de negocio pura → vive SOLO en la API.
+
+🏗️ Cómo se organiza internamente la API
+
+Tu backend debe tener esta arquitectura:
+
+Controller → Service → Repository → Database
+🎮 Controller (REST)
+
+Recibe peticiones HTTP.
+
+Ejemplos:
+
+AuthController
+EmployeesController
+AttendanceController
+DashboardController
+
+Solo reciben request y devuelven response.
+
+Sin lógica pesada.
+
+🧠 Service (lógica del negocio)
+
+Aquí vive TODO lo importante:
+
+Decidir entrada o salida
+Calcular horas trabajadas
+Validar horarios
+Filtrar datos por empresa
+Generar dashboard
+
+Este es el corazón del sistema.
+
+🗄️ Repository (JDBC)
+
+Solo ejecuta SQL.
+
+Ejemplos:
+
+buscar empleado por cédula
+guardar registro de asistencia
+consultar métricas
+
+No hay lógica aquí.
+
+🗄️ Database (PostgreSQL)
+
+Solo guarda datos.
+
+🔐 Seguridad de la API
+
+Tu API tendrá 2 tipos de endpoints:
+
+🔓 Públicos (sin login)
+
+Usados por la terminal:
+
+POST /auth/login
+POST /attendance/register
+GET /attendance/today-summary/{document}
+🔒 Protegidos con JWT
+
+Usados por panel admin:
+
+/employees
+/dashboard/*
+/companies
+/audit/logs
+
+El backend valida el token automáticamente.
+
+🌍 Cómo se conectará con el frontend
+
+En desarrollo:
+
+Parte	URL
+Frontend	localhost:5173
+Backend	localhost:8080
+
+En producción:
+
+Parte	URL
+Frontend	timetrack.app
+Backend	api.timetrack.app
+
+El frontend solo cambia la variable de entorno.
+
+🎯 En resumen
+
+Tu API Spring Boot será:
+
+REST
+Segura con JWT
+Con JDBC + PostgreSQL
+Multiempresa
+Con lógica de asistencia y dashboard
+
+👉 El frontend será solo un cliente de esta API.
