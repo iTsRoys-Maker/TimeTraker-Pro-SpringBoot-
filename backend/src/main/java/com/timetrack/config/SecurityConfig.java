@@ -47,6 +47,7 @@ public class SecurityConfig {
                         "/health",
                         "/attendance/verify-identity",
                         "/attendance/punch",
+                        "/attendance/register",
                         "/attendance/today-summary/**"
                 ).permitAll()
                 .anyRequest().authenticated()

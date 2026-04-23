@@ -35,6 +35,20 @@ public class AttendanceController {
         }
     }
 
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterBody body) {
+        try {
+            PunchResponse r = attendanceService.punch(new PunchBody(body.documentNumber(), null, null));
+            String typeUpper = "check_in".equals(r.type()) ? "CHECK_IN" : "CHECK_OUT";
+            double worked = r.todaySummary() == null ? 0 : r.todaySummary().workedHours();
+            double extra = r.todaySummary() == null ? 0 : r.todaySummary().extraHours();
+            return ResponseEntity.ok(new RegisterResponse(typeUpper, r.message(), worked, extra));
+        } catch (PunchAuthException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new PunchFailureResponse(ex.getMessage(), ex.attemptsRemaining, ex.lockedUntil));
+        }
+    }
+
     @GetMapping("/today-summary/{document}")
     public TodaySummary todaySummary(@PathVariable String document) {
         return attendanceService.getTodaySummary(document);

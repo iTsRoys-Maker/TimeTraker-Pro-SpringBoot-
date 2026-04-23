@@ -41,6 +41,12 @@ public class AttendanceDtos {
 
     public record PunchFailureResponse(String error, Integer attemptsRemaining, OffsetDateTime lockedUntil) {}
 
+    public record RegisterBody(@NotBlank String documentNumber) {}
+
+    public record RegisterResponse(
+            String type, String message, double workedHours, double extraHours
+    ) {}
+
     public record TodaySummary(
             EmployeeRef employee,
             OffsetDateTime checkInTime, OffsetDateTime checkOutTime,
