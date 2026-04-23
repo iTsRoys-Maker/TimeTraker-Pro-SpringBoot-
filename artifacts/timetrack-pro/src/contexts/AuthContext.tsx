@@ -1,12 +1,32 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { useGetMe, UserProfile, setAuthTokenGetter } from "@workspace/api-client-react";
+import {
+  useGetMe,
+  UserProfile,
+  setAuthTokenGetter,
+  setBaseUrl,
+} from "@workspace/api-client-react";
 import { useLocation } from "wouter";
 import { Loader2 } from "lucide-react";
+import {
+  TOKEN_STORAGE_KEY,
+  setStoredToken,
+  setUnauthorizedHandler,
+} from "@/services/apiClient";
 
 // Register synchronously at module load so the bearer token is attached
 // to the very first request fired by React Query (e.g. useGetMe).
 if (typeof window !== "undefined") {
-  setAuthTokenGetter(() => window.localStorage.getItem("timetrack_token"));
+  setAuthTokenGetter(() => window.localStorage.getItem(TOKEN_STORAGE_KEY));
+
+  // Apuntar el cliente generado al backend Spring Boot.
+  // - VITE_API_URL viene como http://localhost:8080/api
+  // - Las rutas generadas ya incluyen /api/..., así que usamos solo el origen.
+  // - Si no hay variable, las llamadas relativas usan el proxy de Vite.
+  const envUrl = (import.meta.env.VITE_API_URL as string | undefined)?.trim();
+  if (envUrl) {
+    const origin = envUrl.replace(/\/+$/, "").replace(/\/api$/, "");
+    setBaseUrl(origin || null);
+  }
 }
 
 interface AuthContextType {
@@ -20,7 +40,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setTokenState] = useState<string | null>(
-    localStorage.getItem("timetrack_token")
+    localStorage.getItem(TOKEN_STORAGE_KEY)
   );
   const [, setLocation] = useLocation();
 
@@ -31,21 +51,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     },
   });
 
+  const logout = () => {
+    setStoredToken(null);
+    setTokenState(null);
+    setLocation("/login");
+  };
+
   useEffect(() => {
     if (isError) {
       logout();
     }
   }, [isError]);
 
-  const login = (newToken: string) => {
-    localStorage.setItem("timetrack_token", newToken);
-    setTokenState(newToken);
-  };
+  // Manejo global de 401: cualquier llamada axios que reciba 401
+  // dispara logout automáticamente.
+  useEffect(() => {
+    setUnauthorizedHandler(() => {
+      setTokenState(null);
+      setLocation("/login");
+    });
+    return () => setUnauthorizedHandler(null);
+  }, [setLocation]);
 
-  const logout = () => {
-    localStorage.removeItem("timetrack_token");
-    setTokenState(null);
-    setLocation("/login");
+  const login = (newToken: string) => {
+    setStoredToken(newToken);
+    setTokenState(newToken);
   };
 
   const isLoading = isUserLoading && !!token;
