@@ -1,0 +1,69 @@
+
+> @workspace/timetrack-pro@0.0.0 dev /home/runner/workspace/artifacts/timetrack-pro
+> vite --config vite.config.ts --host 0.0.0.0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J
+  [32m[1mVITE[22m v7.3.1[39m  [2mready in [0m[1m282[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m24529[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://172.31.64.226:[1m24529[22m/[39m
+[2m[32m  ➜[39m[22m[2m  press [22m[1mh + enter[22m[2m to show help[22m
+[31m(!) Failed to run dependency scan. Skipping dependency pre-bundling. TSConfckParseError: parsing /home/runner/workspace/lib/api-client-react/tsconfig.json failed: Error: ENOENT: no such file or directory, open '/home/runner/workspace/lib/api-client-react/tsconfig.json'
+    at file:///home/runner/workspace/node_modules/.pnpm/vite@7.3.1_@types+node@25.3.5_jiti@2.6.1_lightningcss@1.31.1_tsx@4.21.0_yaml@2.8.2/node_modules/vite/dist/node/chunks/config.js:5719:9[39m
+[2m3:03:56 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m Pre-transform error: parsing /home/runner/workspace/lib/api-client-react/tsconfig.json failed: Error: ENOENT: no such file or directory, open '/home/runner/workspace/lib/api-client-react/tsconfig.json'
+  Plugin: [35mvite:esbuild[39m
+  File: [36m/home/runner/workspace/artifacts/timetrack-pro/src/main.tsx[39m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m3:03:56 PM[22m [31m[1m[vite][22m[39m [31mInternal server error: parsing /home/runner/workspace/lib/api-client-react/tsconfig.json failed: Error: ENOENT: no such file or directory, open '/home/runner/workspace/lib/api-client-react/tsconfig.json'[39m
+  Plugin: [35mvite:esbuild[39m
+  File: [36m/home/runner/workspace/artifacts/timetrack-pro/src/main.tsx[39m
+      at file:///home/runner/workspace/node_modules/.pnpm/vite@7.3.1_@types+node@25.3.5_jiti@2.6.1_lightningcss@1.31.1_tsx@4.21.0_yaml@2.8.2/node_modules/vite/dist/node/chunks/config.js:5719:9
+[2m3:04:15 PM[22m [36m[1m[vite][22m[39m changed tsconfig file detected: /home/runner/workspace/artifacts/timetrack-pro/tsconfig.json - Clearing cache and forcing full-reload to ensure TypeScript is compiled with updated config values.
+/home/runner/workspace/artifacts/timetrack-pro:
+[41m[30m ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL [39m[49m [31m@workspace/timetrack-pro@0.0.0 dev: `vite --config vite.config.ts --host 0.0.0.0`[39m
+[31mCommand failed with signal "SIGTERM"[39m

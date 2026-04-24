@@ -1,0 +1,170 @@
+
+> @workspace/timetrack-pro@0.0.0 dev /home/runner/workspace/artifacts/timetrack-pro
+> vite --config vite.config.ts --host 0.0.0.0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J
+  [32m[1mVITE[22m v7.3.1[39m  [2mready in [0m[1m287[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m24529[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://172.31.64.226:[1m24529[22m/[39m
+[2m[32m  ➜[39m[22m[2m  press [22m[1mh + enter[22m[2m to show help[22m
+[2m3:04:21 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32m✨ new dependencies optimized: [33mreact-dom/client, wouter, @tanstack/react-query, lucide-react, @radix-ui/react-tooltip, date-fns, date-fns/locale, recharts, @radix-ui/react-toast, class-variance-authority, @radix-ui/react-slot, @radix-ui/react-label, @radix-ui/react-select, @radix-ui/react-dialog, clsx, tailwind-merge, mathjs, katex[32m[39m
+[2m3:04:21 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32m✨ optimized dependencies changed. reloading[39m
+[2m3:17:53 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/auth/login[39m
+Error: connect ECONNREFUSED 127.0.0.1:8080
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m3:19:16 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css, /src/components/layout/DashboardLayout.tsx[22m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m3:25:02 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/contexts/AuthContext.tsx, /src/index.css[22m
+[2m3:25:02 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m Pre-transform error: Failed to resolve import "axios" from "src/services/apiClient.ts". Does the file exist?
+  Plugin: [35mvite:import-analysis[39m
+  File: [36m/home/runner/workspace/artifacts/timetrack-pro/src/services/apiClient.ts[39m:1:77
+[33m  1  |  "use strict";
+  2  |  import axios from "axios";
+     |                     ^
+  3  |  export const TOKEN_STORAGE_KEY = "timetrack_token";
+  4  |  const ENV_BASE_URL = import.meta.env.VITE_API_URL?.trim();[39m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m3:25:02 PM[22m [31m[1m[vite][22m[39m [31mInternal server error: Failed to resolve import "axios" from "src/services/apiClient.ts". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36m/home/runner/workspace/artifacts/timetrack-pro/src/services/apiClient.ts[39m:1:77
+[33m  1  |  "use strict";
+  2  |  import axios from "axios";
+     |                     ^
+  3  |  export const TOKEN_STORAGE_KEY = "timetrack_token";
+  4  |  const ENV_BASE_URL = import.meta.env.VITE_API_URL?.trim();[39m
+      at TransformPluginContext._formatLog (file:///home/runner/workspace/node_modules/.pnpm/vite@7.3.1_@types+node@25.3.5_jiti@2.6.1_lightningcss@1.31.1_tsx@4.21.0_yaml@2.8.2/node_modules/vite/dist/node/chunks/config.js:28999:43)
+      at TransformPluginContext.error (file:///home/runner/workspace/node_modules/.pnpm/vite@7.3.1_@types+node@25.3.5_jiti@2.6.1_lightningcss@1.31.1_tsx@4.21.0_yaml@2.8.2/node_modules/vite/dist/node/chunks/config.js:28996:14)
+      at normalizeUrl (file:///home/runner/workspace/node_modules/.pnpm/vite@7.3.1_@types+node@25.3.5_jiti@2.6.1_lightningcss@1.31.1_tsx@4.21.0_yaml@2.8.2/node_modules/vite/dist/node/chunks/config.js:27119:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///home/runner/workspace/node_modules/.pnpm/vite@7.3.1_@types+node@25.3.5_jiti@2.6.1_lightningcss@1.31.1_tsx@4.21.0_yaml@2.8.2/node_modules/vite/dist/node/chunks/config.js:27177:32
+      at async Promise.all (index 0)
+      at async TransformPluginContext.transform (file:///home/runner/workspace/node_modules/.pnpm/vite@7.3.1_@types+node@25.3.5_jiti@2.6.1_lightningcss@1.31.1_tsx@4.21.0_yaml@2.8.2/node_modules/vite/dist/node/chunks/config.js:27145:4)
+      at async EnvironmentPluginContainer.transform (file:///home/runner/workspace/node_modules/.pnpm/vite@7.3.1_@types+node@25.3.5_jiti@2.6.1_lightningcss@1.31.1_tsx@4.21.0_yaml@2.8.2/node_modules/vite/dist/node/chunks/config.js:28797:14)
+      at async loadAndTransform (file:///home/runner/workspace/node_modules/.pnpm/vite@7.3.1_@types+node@25.3.5_jiti@2.6.1_lightningcss@1.31.1_tsx@4.21.0_yaml@2.8.2/node_modules/vite/dist/node/chunks/config.js:22670:26)
+      at async viteTransformMiddleware (file:///home/runner/workspace/node_modules/.pnpm/vite@7.3.1_@types+node@25.3.5_jiti@2.6.1_lightningcss@1.31.1_tsx@4.21.0_yaml@2.8.2/node_modules/vite/dist/node/chunks/config.js:24542:20)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m3:25:12 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/contexts/AuthContext.tsx, /src/index.css[22m
+[2m3:25:12 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m Pre-transform error: Failed to resolve import "axios" from "src/services/apiClient.ts". Does the file exist?
+  Plugin: [35mvite:import-analysis[39m
+  File: [36m/home/runner/workspace/artifacts/timetrack-pro/src/services/apiClient.ts[39m:1:77
+[33m  1  |  "use strict";
+  2  |  import axios from "axios";
+     |                     ^
+  3  |  export const TOKEN_STORAGE_KEY = "timetrack_token";
+  4  |  const ENV_BASE_URL = import.meta.env.VITE_API_URL?.trim();[39m
+/home/runner/workspace/artifacts/timetrack-pro:
+[41m[30m ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL [39m[49m [31m@workspace/timetrack-pro@0.0.0 dev: `vite --config vite.config.ts --host 0.0.0.0`[39m
+[31mCommand failed with signal "SIGTERM"[39m
