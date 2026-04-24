@@ -1,0 +1,26 @@
+### QUICK STATUS (PUBLIC)
+GET http://localhost:8080/api/attendance/quick-status/123456
+
+### CHECK IN / CHECK OUT (PUBLIC)
+POST http://localhost:8080/api/attendance/register
+Content-Type: application/json
+
+{
+  "documentNumber": "123456789"
+}
+
+### CHECK IN / CHECK OUT (PUBLIC)
+POST  http://localhost:8080/api/attendance/register
+Content-Type: application/json
+
+{
+  "documentNumber": "12345678",
+  "pin": "0000"
+}
+
+### GET EMPLOYEES (ADMIN)
+GET http://localhost:8080/api/employees
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIyIiwiY29tcGFueUlkIjoxLCJyb2xlIjoiYWRtaW4iLCJlbWFpbCI6ImFkbWluQGFjbWUubG9jYWwiLCJpYXQiOjE3NzcwNTIyNDIsImV4cCI6MTc3NzEzODY0Mn0.tIbLVXq3YDGMg1YMVZJm3J2BFV7nrh_vBRVP98CVpNGUIiuAYoS_-SfQJLZOQfIx
+
+
+
