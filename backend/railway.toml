@@ -1,5 +1,8 @@
 [build]
-command = "mvn clean package -DskipTests"
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
 
-[start]
-command = "java -jar target/api-server-0.0.1-SNAPSHOT.jar"
+[deploy]
+healthcheckPath = "/api"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
